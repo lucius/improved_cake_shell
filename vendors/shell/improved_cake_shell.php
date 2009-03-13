@@ -1,4 +1,8 @@
 <?php
+
+/*
+ * @author: Marcus Vinicius - Lucius
+ */
 class ImprovedCakeShell extends Shell {
 
     var $_styles = array(
