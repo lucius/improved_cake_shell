@@ -1,0 +1,52 @@
+Opcoes de formatacao
+--------------------
+[b][/b] => bold
+[u][/u] => underscore
+[s][/s] => blink
+[r][/r] => reverse colors
+[c][/c] => conceal
+[fg=COLORS][/fg] => Foreground Color
+[bg=COLORS][/bg] => Backgound Color
+
+COLORS
+    | 'black'
+    | 'red'
+    | 'green'
+    | 'yellow'
+    | 'blue'
+    | 'magenta'
+    | 'cyan'
+    | 'white'
+
+Style
+-----
+$defaults = array(
+        'FAIL' => array(
+            'bg' => 'red',
+            'fg' => 'white',
+            'b' => true
+        ),
+        'SUCCESS' => array(
+            'bg' => 'green',
+            'fg' => 'white',
+            'b' => true
+        )
+    );
+
+    addStyles( $newStyle )
+    ---------------------
+        | $newStyle = array(
+        'NOME_DO_ESTILO' => array(
+            'bg' => 'COLOR',
+            'fg' => 'COLOR',
+            'OPCAO_DE_FORMATACAO' => true
+        )...
+    );
+
+Formatted Out
+-------------
+    formattedOut( $text, $carriageReturn = true, $returnString = false )
+        | $text => O texto propriamente dito...
+        | $carriageReturn => Quebra de linha ou nao
+        | $returnString => Imprime no console ou retorna a string formatada
+
