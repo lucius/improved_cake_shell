@@ -5,8 +5,6 @@
  */
 class ImprovedCakeShell extends Shell {
 
-    var $uses = array('Balloon');
-
     var $_styles = array(
         'FAIL' => array(
             'bg' => 'red',
