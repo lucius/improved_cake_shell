@@ -176,7 +176,7 @@ class ImprovedCakeShell extends Shell {
 
     function _supportsColors( )
     {
-        return !(DS != '\\' && function_exists('posix_isatty') && @posix_isatty(STDOUT));
+        return DS != '\\' && function_exists('posix_isatty') && @posix_isatty(STDOUT);
     }
 
     function _compileOptions( $activeOptions )
