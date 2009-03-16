@@ -5,6 +5,8 @@
  */
 class ImprovedCakeShell extends Shell {
 
+    var $uses = array('Balloon');
+
     var $_styles = array(
         'FAIL' => array(
             'bg' => 'red',
@@ -66,70 +68,117 @@ class ImprovedCakeShell extends Shell {
         'white' => 47
     );
 
-    function __construct( )
+
+    /*
+     * Ajuda na correcao dos Bugs: Joao Jose - Carioca
+     */
+    function __construct( &$dispatch )
     {
-        $args = func_get_args();
-        parent::__construct($args[0]);
+        parent::__construct( $dispatch );
+
+        $command = null;
+        if (isset($this->args[0])) {
+            $command = $this->args[0];
+        }
+        $this->shellCommand = Inflector::variable($command);
+        if (strtolower(get_parent_class($this)) == 'improvedcakeshell') {
+            $this->initialize();
+            $this->loadTasks();
+
+            foreach ($this->taskNames as $task) {
+                if (strtolower(get_parent_class($this)) == 'improvedcakeshell') {
+                    $this->{$task}->initialize();
+                    $this->{$task}->loadTasks();
+                }
+            }
+
+            $task = Inflector::camelize($command);
+            if (in_array($task, $this->taskNames)) {
+                $dispatch->shiftArgs();
+                $this->{$task}->startup();
+                if (isset($dispatch->args[0]) && $dispatch->args[0] == 'help') {
+                    if (method_exists($this->{$task}, 'help')) {
+                        $this->{$task}->help();
+                        $dispatch->_stop();
+                    } else {
+                        $dispatch->help();
+                    }
+                }
+                return $this->{$task}->execute();
+            }
+        }
     }
+
 
     function formattedOut($text, $carriageReturn = true, $returnString = false)
     {
-        if ( $this->_supportsColors() )
+        $found = array();
+
+        if ( !$this->_supportsColors() )
         {
-            if(!$returnString)
+            preg_match_all('/\[([^]]+)\]/', $text, $found);
+
+            foreach ( $found[1] as $key => $tag )
             {
-                $this->out($text, $carriageReturn);
+                $text = str_ireplace($found[0][$key], '', $text);
             }
-            else
+
+            if( $returnString )
             {
                 return $text;
             }
-        }
-
-        $activeOptions = array(
-            'b' => false,
-            'u' => false,
-            's' => false,
-            'r' => false,
-            'c' => false,
-            'bg'=> false,
-            'fg' => false
-        );
-        $newText = '';
-
-        $found = array();
-        preg_match_all('/\[([^]]+)\]/', $text, $found);
-        foreach ( $found[1] as $key => $tag )
-        {
-            if( $tag[0] != '/' )
+            else
             {
-                if ( $this->_enableOption($activeOptions, $tag) )
+                $this->out($text);
+            }
+        }
+        else
+        {
+
+            $activeOptions = array(
+                'b' => false,
+                'u' => false,
+                's' => false,
+                'r' => false,
+                'c' => false,
+                'bg'=> false,
+                'fg' => false
+            );
+            $newText = '';
+
+            preg_match_all('/\[([^]]+)\]/', $text, $found);
+            foreach ( $found[1] as $key => $tag )
+            {
+                if( $tag[0] != '/' )
                 {
-                    $text = str_ireplace( $found[0][$key], "\033[0m"."\033[".$this->_compileOptions($activeOptions).'m', $text );
+                    if ( $this->_enableOption($activeOptions, $tag) )
+                    {
+                        $text = str_ireplace( $found[0][$key], "\033[0m"."\033[".$this->_compileOptions($activeOptions).'m', $text );
+                    }
+                    else
+                    {
+                        $text = str_ireplace( $found[0][$key], "\033[".$this->_compileOptions($activeOptions).'m', $text );
+                    }
                 }
                 else
                 {
-                    $text = str_ireplace( $found[0][$key], "\033[".$this->_compileOptions($activeOptions).'m', $text );
-                }
+                    $this->_disableOption( $activeOptions, $found[1][$key] );
+                    $text = str_ireplace( $found[0][$key], "\033[0m"."\033[".$this->_compileOptions($activeOptions).'m', $text );
+                }    
             }
-            else
+
+            if ( $returnString )
             {
-                $this->_disableOption( $activeOptions, $found[1][$key] );
-                $text = str_ireplace( $found[0][$key], "\033[0m"."\033[".$this->_compileOptions($activeOptions).'m', $text );
-            }    
-        }
+                return $text."\033[0m";
+            }
 
-        if ( $returnString )
-        {
-            return $text."\033[0m";
+            $this->out($text."\033[0m", $carriageReturn);
         }
-
-        $this->out($text."\033[0m", $carriageReturn);
     }
 
     function _supportsColors( )
     {
-        return DS != '\\' && function_exists('posix_isatty') && @posix_isatty(STDOUT);
+        return !(DS != '\\' && function_exists('posix_isatty') && @posix_isatty(STDOUT));
     }
 
     function _compileOptions( $activeOptions )
