@@ -74,9 +74,16 @@ class ImprovedCakeShell extends Shell {
 
     function formattedOut($text, $carriageReturn = true, $returnString = false)
     {
-        if ( !$this->_supportsColors() )
+        if ( $this->_supportsColors() )
         {
-            return $text;
+            if(!$returnString)
+            {
+                $this->out($text, $carriageReturn);
+            }
+            else
+            {
+                return $text;
+            }
         }
 
         $activeOptions = array(
