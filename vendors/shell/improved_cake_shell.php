@@ -79,12 +79,12 @@ class ImprovedCakeShell extends Shell {
             $command = $this->args[0];
         }
         $this->shellCommand = Inflector::variable($command);
-        if (strtolower(get_parent_class($this)) == 'improvedcakeshell') {
+        if(preg_match('/^.*Shell$/', get_parent_class($this))) {
             $this->initialize();
             $this->loadTasks();
 
             foreach ($this->taskNames as $task) {
-                if (strtolower(get_parent_class($this)) == 'improvedcakeshell') {
+                if(preg_match('/^.*Shell$/', get_parent_class($this))) {
                     $this->{$task}->initialize();
                     $this->{$task}->loadTasks();
                 }
